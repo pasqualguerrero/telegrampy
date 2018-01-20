@@ -8,7 +8,7 @@ version = re.search(
 setup(
     name="telegrampy",
     version=version,
-    description="Python client to get notifications through Telegram.",
+    description="Python client to send notifications through Telegram.",
     url="https://github.com/pasqualguerrero/telegrampy",
     author="Pasqual Guerrero",
     author_email="pasqual.guerrero@gmail.com",
