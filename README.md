@@ -1,5 +1,5 @@
 # Telegrampy
-Get notifications from multiple services through telegram
+Send notifications from multiple services through telegram
 
 ### Installation
 ```
