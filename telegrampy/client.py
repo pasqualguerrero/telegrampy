@@ -1,5 +1,6 @@
 import json
 import requests
+from multiprocessing.dummy import Pool
 
 from telegrampy.conf import TELEGRAM_API_DOMAIN, TELEGRAM_API_METHODS, EMOJIS
 from telegrampy.utils import get_telegram_bot_token, get_telegram_chat_id
@@ -11,6 +12,7 @@ class TelegramClient(object):
         self.token = get_telegram_bot_token()
         self.chat_id = get_telegram_chat_id()
         self.bot = "bot%s" % self.token
+        self.pool = Pool(processes=1)
 
     def _make_request(self, method, endpoint, payload={}):
         headers = {'Content-Type': 'application/json'}
@@ -28,8 +30,8 @@ class TelegramClient(object):
 
     def notify(self, text):
         """
-        Post a message using sendMessage method to telegram api. Returns True
-        or False if the message could be delivered.
+        Post a message using sendMessage method to telegram api. It executes
+        http request in a thread.
         """
         url = self._build_telegram_url("send_message")
         payload = {
@@ -39,26 +41,20 @@ class TelegramClient(object):
             "disable_web_page_preview": True,
             "disable_notification": False,
         }
-        response = self._make_request("post", url, payload)
-        try:
-            response.raise_for_status()
-        except requests.exceptions.HTTPError:
-            return False
-        else:
-            return True
+        self.pool.apply_async(self._make_request, ["post", url, payload])
 
     def info(self, text):
         # Append info emoji to text message
-        return self.notify("%s %s" % (EMOJIS["info"], text))
+        self.notify("%s %s" % (EMOJIS["info"], text))
 
     def success(self, text):
         # Append success emoji to text message
-        return self.notify("%s %s" % (EMOJIS["success"], text))
+        self.notify("%s %s" % (EMOJIS["success"], text))
 
     def warning(self, text):
         # Append warning emoji to text message
-        return self.notify("%s %s" % (EMOJIS["warning"], text))
+        self.notify("%s %s" % (EMOJIS["warning"], text))
 
     def error(self, text):
         # Append info emoji to text message
-        return self.notify("%s %s" % (EMOJIS["error"], text))
+        self.notify("%s %s" % (EMOJIS["error"], text))
